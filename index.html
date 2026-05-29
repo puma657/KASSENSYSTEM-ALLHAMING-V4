@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kassensystem</title>
+
   <style>
     :root {
       --bg: #eef2f6;
@@ -23,7 +24,9 @@
       --small-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -44,11 +47,25 @@
       padding: 14px 22px;
       background: rgba(255, 255, 255, 0.94);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
-    h1 { margin: 0; font-size: 30px; }
-    h2 { margin: 0 0 14px; font-size: 23px; }
-    p { margin-top: 0; color: var(--muted); }
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      color: var(--text);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 23px;
+      color: var(--text);
+    }
+
+    p {
+      margin-top: 0;
+      color: var(--muted);
+    }
 
     main {
       max-width: 1180px;
@@ -56,11 +73,32 @@
       padding: 28px 18px 96px;
     }
 
-    .spacer { flex: 1; }
-    .page { display: none; }
-    .page.active { display: block; }
+    .spacer {
+      flex: 1;
+    }
 
-    .panel, .box {
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: pageIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes pageIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel,
+    .box {
       background: rgba(255, 255, 255, 0.96);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -68,8 +106,9 @@
       box-shadow: var(--shadow);
     }
 
-    .form, .custom-pay {
+    .form {
       display: grid;
+      grid-template-columns: 1fr 180px auto auto;
       gap: 14px;
       align-items: end;
       margin-top: 18px;
@@ -79,8 +118,17 @@
       background: var(--soft);
     }
 
-    .form { grid-template-columns: 1fr 180px auto auto; }
-    .custom-pay { grid-template-columns: 1fr auto; margin-bottom: 18px; }
+    .custom-pay {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: end;
+      margin: 18px 0;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--soft);
+    }
 
     label {
       display: grid;
@@ -117,11 +165,18 @@
       color: white;
       background: var(--green);
       cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
     }
 
     button:hover {
       background: var(--green-dark);
       box-shadow: var(--small-shadow);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
     }
 
     .light {
@@ -130,8 +185,25 @@
       border: 1px solid var(--border);
     }
 
-    .danger { background: var(--red); }
-    .blue { background: var(--blue); }
+    .light:hover {
+      background: #e1e7ef;
+    }
+
+    .danger {
+      background: var(--red);
+    }
+
+    .danger:hover {
+      background: #8f1c13;
+    }
+
+    .blue {
+      background: var(--blue);
+    }
+
+    .blue:hover {
+      background: #1d4ed8;
+    }
 
     .icon {
       width: 46px;
@@ -146,8 +218,13 @@
       background: #334155;
     }
 
-    .back.show { display: block; }
-    .hidden { display: none; }
+    .back.show {
+      display: block;
+    }
+
+    .hidden {
+      display: none;
+    }
 
     .grid {
       display: grid;
@@ -171,6 +248,13 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       background: white;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .row:hover {
+      border-color: #c7d2e1;
+      box-shadow: var(--small-shadow);
+      transform: translateY(-1px);
     }
 
     .product-meta {
@@ -192,12 +276,21 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: var(--small-shadow);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .choice:hover {
+      color: var(--text);
+      background: #f8fffd;
+      border-color: var(--green);
+      transform: translateY(-2px);
     }
 
     .choice.selected {
       background: var(--blue-soft);
       border-color: var(--blue);
       box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), var(--small-shadow);
+      animation: selectPop 0.18s ease-out;
     }
 
     .price {
@@ -218,6 +311,7 @@
       color: white;
       background: var(--blue);
       font-weight: bold;
+      animation: badgePop 0.18s ease-out;
     }
 
     .cart-summary {
@@ -237,7 +331,8 @@
       margin: 18px 0;
     }
 
-    .summary strong, .box strong {
+    .summary strong,
+    .box strong {
       display: block;
       margin-top: 6px;
       font-size: 34px;
@@ -268,7 +363,9 @@
       border: 1px solid #fed7aa;
     }
 
-    .notice.show { display: block; }
+    .notice.show {
+      display: block;
+    }
 
     .modal-bg {
       display: none;
@@ -281,7 +378,13 @@
       background: rgba(15, 23, 42, 0.56);
     }
 
-    .modal-bg.show { display: flex; }
+    .modal-bg.show {
+      display: flex;
+    }
+
+    .modal-bg.show .modal {
+      animation: modalIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
 
     .modal {
       width: min(720px, 100%);
@@ -308,11 +411,66 @@
       margin: 16px 0;
     }
 
-    @media (max-width: 720px) {
-      header { padding-inline: 12px; }
-      main { padding-inline: 12px; }
+    @keyframes selectPop {
+      from {
+        transform: scale(0.98);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
 
-      .form, .custom-pay, .row, .summary, .two {
+    @keyframes badgePop {
+      from {
+        opacity: 0;
+        transform: scale(0.75);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page.active,
+      .choice.selected,
+      .selected-count,
+      .modal-bg.show .modal {
+        animation: none;
+      }
+
+      button,
+      .row,
+      .choice {
+        transition: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      header {
+        padding-inline: 12px;
+      }
+
+      main {
+        padding-inline: 12px;
+      }
+
+      .form,
+      .custom-pay,
+      .row,
+      .summary,
+      .two {
         grid-template-columns: 1fr;
       }
 
@@ -322,7 +480,9 @@
         bottom: 12px;
       }
 
-      .finish button { width: 100%; }
+      .finish button {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -380,9 +540,18 @@
       <p>Wähle aus, wie viel Geld der Kunde gibt.</p>
 
       <div class="summary">
-        <div class="box">Gesamt <strong id="paymentTotal">0,00 €</strong></div>
-        <div class="box">Gegeben <strong id="paidAmount">0,00 €</strong></div>
-        <div class="box">Wechselgeld <strong id="changeAmount">0,00 €</strong></div>
+        <div class="box">
+          Gesamt
+          <strong id="paymentTotal">0,00 €</strong>
+        </div>
+        <div class="box">
+          Gegeben
+          <strong id="paidAmount">0,00 €</strong>
+        </div>
+        <div class="box">
+          Wechselgeld
+          <strong id="changeAmount">0,00 €</strong>
+        </div>
       </div>
 
       <div class="custom-pay">
@@ -410,8 +579,14 @@
       </div>
 
       <div class="two">
-        <div class="box">Verkauft insgesamt <strong id="soldTotal">0</strong></div>
-        <div class="box">Einnahmen insgesamt <strong id="revenueTotal">0,00 €</strong></div>
+        <div class="box">
+          Verkauft insgesamt
+          <strong id="soldTotal">0</strong>
+        </div>
+        <div class="box">
+          Einnahmen insgesamt
+          <strong id="revenueTotal">0,00 €</strong>
+        </div>
       </div>
 
       <div id="statsList" class="list"></div>
@@ -425,7 +600,11 @@
     var cart = [];
     var paid = 0;
     var editingProductId = "";
-    var stats = { revenue: 0, products: {} };
+    var stats = {
+      revenue: 0,
+      products: {}
+    };
+
     var moneyOptions = [0.05, 0.10, 0.20, 0.50, 1, 2, 5, 10, 20, 50, 100];
 
     function getElement(id) {
@@ -458,14 +637,30 @@
         var savedProducts = localStorage.getItem("cashProducts");
         var savedStats = localStorage.getItem("cashStats");
 
-        if (savedProducts) products = JSON.parse(savedProducts);
-        if (savedStats) stats = JSON.parse(savedStats);
+        if (savedProducts) {
+          products = JSON.parse(savedProducts);
+        }
 
-        if (!products || !products.length) products = [];
-        if (!stats || !stats.products) stats = { revenue: 0, products: {} };
+        if (savedStats) {
+          stats = JSON.parse(savedStats);
+        }
+
+        if (!products || !products.length) {
+          products = [];
+        }
+
+        if (!stats || !stats.products) {
+          stats = {
+            revenue: 0,
+            products: {}
+          };
+        }
       } catch (error) {
         products = [];
-        stats = { revenue: 0, products: {} };
+        stats = {
+          revenue: 0,
+          products: {}
+        };
       }
     }
 
@@ -487,9 +682,11 @@
 
     function getCartTotal() {
       var sum = 0;
+
       for (var i = 0; i < cart.length; i++) {
         sum += cart[i].price * cart[i].quantity;
       }
+
       return Math.round(sum * 100) / 100;
     }
 
@@ -529,7 +726,8 @@
 
     function saveProductFromForm() {
       var name = getElement("productNameInput").value;
-      var price = parseEuroInput(getElement("productPriceInput").value);
+      var priceText = getElement("productPriceInput").value;
+      var price = parseEuroInput(priceText);
 
       name = name.replace(/^\s+|\s+$/g, "");
 
@@ -543,8 +741,8 @@
         return;
       }
 
-      price = Math.round(price * 100) / 100;
       hideNotice("setupNotice");
+      price = Math.round(price * 100) / 100;
 
       if (editingProductId) {
         updateProduct(editingProductId, name, price);
@@ -603,19 +801,26 @@
     function deleteProduct(id) {
       var newProducts = [];
       var newCart = [];
+      var i;
 
-      for (var i = 0; i < products.length; i++) {
-        if (products[i].id !== id) newProducts.push(products[i]);
+      for (i = 0; i < products.length; i++) {
+        if (products[i].id !== id) {
+          newProducts.push(products[i]);
+        }
       }
 
-      for (var j = 0; j < cart.length; j++) {
-        if (cart[j].id !== id) newCart.push(cart[j]);
+      for (i = 0; i < cart.length; i++) {
+        if (cart[i].id !== id) {
+          newCart.push(cart[i]);
+        }
       }
 
       products = newProducts;
       cart = newCart;
 
-      if (editingProductId === id) resetEditMode();
+      if (editingProductId === id) {
+        resetEditMode();
+      }
 
       saveData();
       renderProducts();
@@ -638,9 +843,9 @@
 
         row.className = "row";
         row.innerHTML =
-          "<div class='product-meta'>" +
+          "<div class=\"product-meta\">" +
           "<strong>" + escapeHtml(product.name) + "</strong>" +
-          "<span class='muted-line'>" + formatEuro(product.price) + "</span>" +
+          "<span class=\"muted-line\">" + formatEuro(product.price) + "</span>" +
           "</div>";
 
         editButton.type = "button";
@@ -667,8 +872,11 @@
 
     function findCartItem(id) {
       for (var i = 0; i < cart.length; i++) {
-        if (cart[i].id === id) return cart[i];
+        if (cart[i].id === id) {
+          return cart[i];
+        }
       }
+
       return null;
     }
 
@@ -676,7 +884,9 @@
       var product = null;
 
       for (var i = 0; i < products.length; i++) {
-        if (products[i].id === id) product = products[i];
+        if (products[i].id === id) {
+          product = products[i];
+        }
       }
 
       if (!product) return;
@@ -706,7 +916,9 @@
       item.quantity += amount;
 
       for (var i = 0; i < cart.length; i++) {
-        if (cart[i].quantity > 0) newCart.push(cart[i]);
+        if (cart[i].quantity > 0) {
+          newCart.push(cart[i]);
+        }
       }
 
       cart = newCart;
@@ -728,8 +940,8 @@
 
         button.innerHTML =
           "<strong>" + escapeHtml(product.name) + "</strong>" +
-          "<span class='price'>" + formatEuro(product.price) + "</span>" +
-          (item ? "<span class='selected-count'>" + item.quantity + "x</span>" : "");
+          "<span class=\"price\">" + formatEuro(product.price) + "</span>" +
+          (item ? "<span class=\"selected-count\">" + item.quantity + "x</span>" : "");
 
         button.onclick = function () {
           addToCart(this.getAttribute("data-id"));
@@ -754,7 +966,9 @@
         return;
       }
 
-      for (var i = 0; i < cart.length; i++) itemCount += cart[i].quantity;
+      for (var i = 0; i < cart.length; i++) {
+        itemCount += cart[i].quantity;
+      }
 
       summary.textContent =
         itemCount +
@@ -830,7 +1044,6 @@
         moneyButton.className = "choice";
         moneyButton.textContent = formatEuro(moneyOptions[i]);
         moneyButton.setAttribute("data-amount", moneyOptions[i]);
-
         moneyButton.onclick = function () {
           paid = Math.round((paid + Number(this.getAttribute("data-amount"))) * 100) / 100;
           renderPayment();
@@ -903,7 +1116,9 @@
       var soldTotal = 0;
 
       for (var id in stats.products) {
-        if (stats.products.hasOwnProperty(id)) items.push(stats.products[id]);
+        if (stats.products.hasOwnProperty(id)) {
+          items.push(stats.products[id]);
+        }
       }
 
       items.sort(function (a, b) {
@@ -912,7 +1127,9 @@
 
       list.innerHTML = "";
 
-      for (var i = 0; i < items.length; i++) soldTotal += items[i].quantity;
+      for (var i = 0; i < items.length; i++) {
+        soldTotal += items[i].quantity;
+      }
 
       getElement("soldTotal").textContent = soldTotal;
       getElement("revenueTotal").textContent = formatEuro(stats.revenue);
@@ -962,9 +1179,11 @@
         }
 
         saveSaleToStats();
+
         cart = [];
         paid = 0;
         getElement("customPaidInput").value = "";
+
         showPage("sales");
       }
     }
@@ -1007,9 +1226,15 @@
       };
 
       getElement("resetStatsButton").onclick = function () {
-        if (!confirm("Statistik wirklich löschen?")) return;
+        if (!confirm("Statistik wirklich löschen?")) {
+          return;
+        }
 
-        stats = { revenue: 0, products: {} };
+        stats = {
+          revenue: 0,
+          products: {}
+        };
+
         saveData();
         renderStats();
       };
