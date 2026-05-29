@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kassensystem</title>
+  <style>
+    :root {
+      --bg: #eef2f6;
+      --card: #ffffff;
+      --soft: #f8fafc;
+      --text: #172033;
+      --muted: #697386;
+      --border: #d9e1ec;
+      --green: #0f766e;
+      --green-dark: #0b5f59;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --red: #b42318;
+      --orange-bg: #fff7ed;
+      --orange-text: #9a3412;
+      --shadow: 0 18px 45px rgba(17, 24, 39, 0.10);
+      --small-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f8fafc 0, var(--bg) 320px, #e8edf4 100%);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 72px;
+      padding: 14px 22px;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 { margin: 0; font-size: 30px; }
+    h2 { margin: 0 0 14px; font-size: 23px; }
+    p { margin-top: 0; color: var(--muted); }
+
+    main {
+      max-width: 1180px;
+      margin: auto;
+      padding: 28px 18px 96px;
+    }
+
+    .spacer { flex: 1; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .panel, .box {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .form, .custom-pay {
+      display: grid;
+      gap: 14px;
+      align-items: end;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--soft);
+    }
+
+    .form { grid-template-columns: 1fr 180px auto auto; }
+    .custom-pay { grid-template-columns: 1fr auto; margin-bottom: 18px; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #516070;
+    }
+
+    input {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 17px;
+      color: var(--text);
+      outline: none;
+      background: white;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    button {
+      min-height: 50px;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 17px;
+      font-weight: bold;
+      color: white;
+      background: var(--green);
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--green-dark);
+      box-shadow: var(--small-shadow);
+    }
+
+    .light {
+      color: var(--text);
+      background: #eef2f7;
+      border: 1px solid var(--border);
+    }
+
+    .danger { background: var(--red); }
+    .blue { background: var(--blue); }
+
+    .icon {
+      width: 46px;
+      height: 46px;
+      padding: 0;
+      font-size: 24px;
+      border-radius: 12px;
+    }
+
+    .back {
+      display: none;
+      background: #334155;
+    }
+
+    .back.show { display: block; }
+    .hidden { display: none; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(174px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+    }
+
+    .product-meta {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .muted-line {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .choice {
+      min-height: 96px;
+      text-align: left;
+      color: var(--text);
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--small-shadow);
+    }
+
+    .choice.selected {
+      background: var(--blue-soft);
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), var(--small-shadow);
+    }
+
+    .price {
+      display: block;
+      margin-top: 6px;
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .selected-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      margin-top: 10px;
+      border-radius: 10px;
+      color: white;
+      background: var(--blue);
+      font-weight: bold;
+    }
+
+    .cart-summary {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      color: #155e75;
+      background: #ecfeff;
+      border: 1px solid #67e8f9;
+      font-weight: bold;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .summary strong, .box strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 34px;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    .finish {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+    }
+
+    .finish button {
+      min-width: 164px;
+      border-radius: 14px;
+      box-shadow: 0 16px 34px rgba(15, 118, 110, 0.28);
+    }
+
+    .notice {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      color: var(--orange-text);
+      background: var(--orange-bg);
+      border: 1px solid #fed7aa;
+    }
+
+    .notice.show { display: block; }
+
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.56);
+    }
+
+    .modal-bg.show { display: flex; }
+
+    .modal {
+      width: min(720px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      padding: 18px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 720px) {
+      header { padding-inline: 12px; }
+      main { padding-inline: 12px; }
+
+      .form, .custom-pay, .row, .summary, .two {
+        grid-template-columns: 1fr;
+      }
+
+      .finish {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+      }
+
+      .finish button { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <button id="backButton" class="icon back" type="button">‹</button>
+    <h1 id="pageTitle">Produkte anlegen</h1>
+    <div class="spacer"></div>
+    <button id="statsButton" class="icon blue" type="button">€</button>
+  </header>
+
+  <main>
+    <section id="setupPage" class="page active">
+      <div class="panel">
+        <h2>Produkt hinzufügen</h2>
+        <p>Gib Produktname und Preis ein. Du kannst Produkte später auch bearbeiten.</p>
+
+        <div class="form">
+          <label>
+            Produktname
+            <input id="productNameInput" type="text" placeholder="z. B. Apfel">
+          </label>
+
+          <label>
+            Preis in Euro
+            <input id="productPriceInput" type="text" inputmode="decimal" placeholder="1,50">
+          </label>
+
+          <button id="addProductButton" type="button">Hinzufügen</button>
+          <button id="cancelEditButton" class="light hidden" type="button">Abbrechen</button>
+        </div>
+
+        <div id="setupNotice" class="notice"></div>
+        <div id="productList" class="list"></div>
+      </div>
+    </section>
+
+    <section id="salesPage" class="page">
+      <h2>Produkte auswählen</h2>
+      <p>Drücke auf ein Produkt, um es zum Einkauf hinzuzufügen.</p>
+
+      <div id="productButtons" class="grid"></div>
+
+      <div class="panel" style="margin-top:20px">
+        <h2>Aktueller Einkauf</h2>
+        <button id="clearCartButton" class="light" type="button">Einkauf leeren</button>
+        <div id="cartSummary" class="cart-summary">Noch nichts ausgewählt.</div>
+        <div id="cartList" class="list"></div>
+      </div>
+    </section>
+
+    <section id="paymentPage" class="page">
+      <h2>Bezahlung</h2>
+      <p>Wähle aus, wie viel Geld der Kunde gibt.</p>
+
+      <div class="summary">
+        <div class="box">Gesamt <strong id="paymentTotal">0,00 €</strong></div>
+        <div class="box">Gegeben <strong id="paidAmount">0,00 €</strong></div>
+        <div class="box">Wechselgeld <strong id="changeAmount">0,00 €</strong></div>
+      </div>
+
+      <div class="custom-pay">
+        <label>
+          Eigener Betrag
+          <input id="customPaidInput" type="text" inputmode="decimal" placeholder="z. B. 12,50">
+        </label>
+        <button id="customPaidButton" class="blue" type="button">Betrag setzen</button>
+      </div>
+
+      <div id="paymentNotice" class="notice"></div>
+      <div id="moneyButtons" class="grid"></div>
+    </section>
+  </main>
+
+  <div class="finish">
+    <button id="finishButton" type="button">Fertig</button>
+  </div>
+
+  <div id="statsModal" class="modal-bg">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Verkaufsstatistik</h2>
+        <button id="closeStatsButton" class="light" type="button">Schließen</button>
+      </div>
+
+      <div class="two">
+        <div class="box">Verkauft insgesamt <strong id="soldTotal">0</strong></div>
+        <div class="box">Einnahmen insgesamt <strong id="revenueTotal">0,00 €</strong></div>
+      </div>
+
+      <div id="statsList" class="list"></div>
+      <button id="resetStatsButton" class="danger" type="button" style="margin-top:16px">Statistik löschen</button>
+    </div>
+  </div>
+
+  <script>
+    var currentPage = "setup";
+    var products = [];
+    var cart = [];
+    var paid = 0;
+    var editingProductId = "";
+    var stats = { revenue: 0, products: {} };
+    var moneyOptions = [0.05, 0.10, 0.20, 0.50, 1, 2, 5, 10, 20, 50, 100];
+
+    function getElement(id) {
+      return document.getElementById(id);
+    }
+
+    function formatEuro(value) {
+      return Number(value).toLocaleString("de-AT", {
+        style: "currency",
+        currency: "EUR"
+      });
+    }
+
+    function parseEuroInput(value) {
+      var text = String(value || "");
+      text = text.replace(",", ".");
+      text = text.replace(/\s/g, "");
+      return Number(text);
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem("cashProducts", JSON.stringify(products));
+        localStorage.setItem("cashStats", JSON.stringify(stats));
+      } catch (error) {}
+    }
+
+    function loadData() {
+      try {
+        var savedProducts = localStorage.getItem("cashProducts");
+        var savedStats = localStorage.getItem("cashStats");
+
+        if (savedProducts) products = JSON.parse(savedProducts);
+        if (savedStats) stats = JSON.parse(savedStats);
+
+        if (!products || !products.length) products = [];
+        if (!stats || !stats.products) stats = { revenue: 0, products: {} };
+      } catch (error) {
+        products = [];
+        stats = { revenue: 0, products: {} };
+      }
+    }
+
+    function escapeHtml(text) {
+      var span = document.createElement("span");
+      span.textContent = text;
+      return span.innerHTML;
+    }
+
+    function showNotice(id, message) {
+      var element = getElement(id);
+      element.textContent = message;
+      element.className = "notice show";
+    }
+
+    function hideNotice(id) {
+      getElement(id).className = "notice";
+    }
+
+    function getCartTotal() {
+      var sum = 0;
+      for (var i = 0; i < cart.length; i++) {
+        sum += cart[i].price * cart[i].quantity;
+      }
+      return Math.round(sum * 100) / 100;
+    }
+
+    function showPage(pageName) {
+      currentPage = pageName;
+
+      getElement("setupPage").className = pageName === "setup" ? "page active" : "page";
+      getElement("salesPage").className = pageName === "sales" ? "page active" : "page";
+      getElement("paymentPage").className = pageName === "payment" ? "page active" : "page";
+
+      if (pageName === "setup") {
+        getElement("pageTitle").textContent = "Produkte anlegen";
+        getElement("backButton").className = "icon back";
+      }
+
+      if (pageName === "sales") {
+        getElement("pageTitle").textContent = "Kassieren";
+        getElement("backButton").className = "icon back show";
+        renderSales();
+      }
+
+      if (pageName === "payment") {
+        getElement("pageTitle").textContent = "Bezahlung";
+        getElement("backButton").className = "icon back show";
+        renderPayment();
+      }
+    }
+
+    function resetEditMode() {
+      editingProductId = "";
+      getElement("addProductButton").textContent = "Hinzufügen";
+      getElement("cancelEditButton").className = "light hidden";
+      getElement("productNameInput").value = "";
+      getElement("productPriceInput").value = "";
+      hideNotice("setupNotice");
+    }
+
+    function saveProductFromForm() {
+      var name = getElement("productNameInput").value;
+      var price = parseEuroInput(getElement("productPriceInput").value);
+
+      name = name.replace(/^\s+|\s+$/g, "");
+
+      if (name === "") {
+        showNotice("setupNotice", "Bitte gib einen Produktnamen ein.");
+        return;
+      }
+
+      if (isNaN(price) || price <= 0) {
+        showNotice("setupNotice", "Bitte gib einen gültigen Preis ein.");
+        return;
+      }
+
+      price = Math.round(price * 100) / 100;
+      hideNotice("setupNotice");
+
+      if (editingProductId) {
+        updateProduct(editingProductId, name, price);
+        resetEditMode();
+      } else {
+        products.push({
+          id: String(new Date().getTime()) + String(Math.floor(Math.random() * 10000)),
+          name: name,
+          price: price
+        });
+
+        getElement("productNameInput").value = "";
+        getElement("productPriceInput").value = "";
+      }
+
+      saveData();
+      renderProducts();
+    }
+
+    function updateProduct(id, name, price) {
+      var i;
+
+      for (i = 0; i < products.length; i++) {
+        if (products[i].id === id) {
+          products[i].name = name;
+          products[i].price = price;
+        }
+      }
+
+      for (i = 0; i < cart.length; i++) {
+        if (cart[i].id === id) {
+          cart[i].name = name;
+          cart[i].price = price;
+        }
+      }
+
+      if (stats.products[id]) {
+        stats.products[id].name = name;
+      }
+    }
+
+    function editProduct(id) {
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id === id) {
+          editingProductId = id;
+          getElement("productNameInput").value = products[i].name;
+          getElement("productPriceInput").value = String(products[i].price).replace(".", ",");
+          getElement("addProductButton").textContent = "Speichern";
+          getElement("cancelEditButton").className = "light";
+          getElement("productNameInput").focus();
+          return;
+        }
+      }
+    }
+
+    function deleteProduct(id) {
+      var newProducts = [];
+      var newCart = [];
+
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id !== id) newProducts.push(products[i]);
+      }
+
+      for (var j = 0; j < cart.length; j++) {
+        if (cart[j].id !== id) newCart.push(cart[j]);
+      }
+
+      products = newProducts;
+      cart = newCart;
+
+      if (editingProductId === id) resetEditMode();
+
+      saveData();
+      renderProducts();
+    }
+
+    function renderProducts() {
+      var list = getElement("productList");
+      list.innerHTML = "";
+
+      if (products.length === 0) {
+        list.innerHTML = "<p>Noch keine Produkte angelegt.</p>";
+        return;
+      }
+
+      for (var i = 0; i < products.length; i++) {
+        var product = products[i];
+        var row = document.createElement("div");
+        var editButton = document.createElement("button");
+        var deleteButton = document.createElement("button");
+
+        row.className = "row";
+        row.innerHTML =
+          "<div class='product-meta'>" +
+          "<strong>" + escapeHtml(product.name) + "</strong>" +
+          "<span class='muted-line'>" + formatEuro(product.price) + "</span>" +
+          "</div>";
+
+        editButton.type = "button";
+        editButton.className = "light";
+        editButton.textContent = "Bearbeiten";
+        editButton.setAttribute("data-id", product.id);
+        editButton.onclick = function () {
+          editProduct(this.getAttribute("data-id"));
+        };
+
+        deleteButton.type = "button";
+        deleteButton.className = "danger";
+        deleteButton.textContent = "Löschen";
+        deleteButton.setAttribute("data-id", product.id);
+        deleteButton.onclick = function () {
+          deleteProduct(this.getAttribute("data-id"));
+        };
+
+        row.appendChild(editButton);
+        row.appendChild(deleteButton);
+        list.appendChild(row);
+      }
+    }
+
+    function findCartItem(id) {
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].id === id) return cart[i];
+      }
+      return null;
+    }
+
+    function addToCart(id) {
+      var product = null;
+
+      for (var i = 0; i < products.length; i++) {
+        if (products[i].id === id) product = products[i];
+      }
+
+      if (!product) return;
+
+      var item = findCartItem(id);
+
+      if (item) {
+        item.quantity += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1
+        });
+      }
+
+      renderSales();
+    }
+
+    function changeQuantity(id, amount) {
+      var item = findCartItem(id);
+      var newCart = [];
+
+      if (!item) return;
+
+      item.quantity += amount;
+
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].quantity > 0) newCart.push(cart[i]);
+      }
+
+      cart = newCart;
+      renderSales();
+    }
+
+    function renderSales() {
+      var buttons = getElement("productButtons");
+      buttons.innerHTML = "";
+
+      for (var i = 0; i < products.length; i++) {
+        var product = products[i];
+        var item = findCartItem(product.id);
+        var button = document.createElement("button");
+
+        button.type = "button";
+        button.className = item ? "choice selected" : "choice";
+        button.setAttribute("data-id", product.id);
+
+        button.innerHTML =
+          "<strong>" + escapeHtml(product.name) + "</strong>" +
+          "<span class='price'>" + formatEuro(product.price) + "</span>" +
+          (item ? "<span class='selected-count'>" + item.quantity + "x</span>" : "");
+
+        button.onclick = function () {
+          addToCart(this.getAttribute("data-id"));
+        };
+
+        buttons.appendChild(button);
+      }
+
+      renderCart();
+    }
+
+    function renderCart() {
+      var list = getElement("cartList");
+      var summary = getElement("cartSummary");
+      var itemCount = 0;
+
+      list.innerHTML = "";
+
+      if (cart.length === 0) {
+        summary.textContent = "Noch nichts ausgewählt.";
+        list.innerHTML = "<p>Der Einkauf ist noch leer.</p>";
+        return;
+      }
+
+      for (var i = 0; i < cart.length; i++) itemCount += cart[i].quantity;
+
+      summary.textContent =
+        itemCount +
+        " Produkt" +
+        (itemCount === 1 ? "" : "e") +
+        " ausgewählt - Gesamt: " +
+        formatEuro(getCartTotal());
+
+      for (var j = 0; j < cart.length; j++) {
+        var item = cart[j];
+        var row = document.createElement("div");
+        var controls = document.createElement("div");
+        var minusButton = document.createElement("button");
+        var plusButton = document.createElement("button");
+
+        row.className = "row";
+        row.innerHTML =
+          "<strong>" + item.quantity + " x " + escapeHtml(item.name) + "</strong>" +
+          "<span>" + formatEuro(item.price * item.quantity) + "</span>";
+
+        minusButton.type = "button";
+        minusButton.className = "light";
+        minusButton.textContent = "-";
+        minusButton.setAttribute("data-id", item.id);
+        minusButton.onclick = function () {
+          changeQuantity(this.getAttribute("data-id"), -1);
+        };
+
+        plusButton.type = "button";
+        plusButton.className = "light";
+        plusButton.textContent = "+";
+        plusButton.setAttribute("data-id", item.id);
+        plusButton.onclick = function () {
+          changeQuantity(this.getAttribute("data-id"), 1);
+        };
+
+        controls.appendChild(minusButton);
+        controls.appendChild(plusButton);
+        row.appendChild(controls);
+        list.appendChild(row);
+      }
+
+      var totalRow = document.createElement("div");
+      totalRow.className = "row";
+      totalRow.innerHTML =
+        "<strong>Gesamt</strong>" +
+        "<strong>" + formatEuro(getCartTotal()) + "</strong>" +
+        "<span></span>";
+
+      list.appendChild(totalRow);
+    }
+
+    function renderPayment() {
+      var total = getCartTotal();
+      var buttons = getElement("moneyButtons");
+
+      getElement("paymentTotal").textContent = formatEuro(total);
+      getElement("paidAmount").textContent = formatEuro(paid);
+      getElement("changeAmount").textContent = formatEuro(Math.max(0, paid - total));
+
+      if (paid > 0 && paid < total) {
+        showNotice("paymentNotice", "Der gegebene Betrag reicht noch nicht aus.");
+      } else {
+        hideNotice("paymentNotice");
+      }
+
+      buttons.innerHTML = "";
+
+      for (var i = 0; i < moneyOptions.length; i++) {
+        var moneyButton = document.createElement("button");
+
+        moneyButton.type = "button";
+        moneyButton.className = "choice";
+        moneyButton.textContent = formatEuro(moneyOptions[i]);
+        moneyButton.setAttribute("data-amount", moneyOptions[i]);
+
+        moneyButton.onclick = function () {
+          paid = Math.round((paid + Number(this.getAttribute("data-amount"))) * 100) / 100;
+          renderPayment();
+        };
+
+        buttons.appendChild(moneyButton);
+      }
+
+      var exactButton = document.createElement("button");
+      exactButton.type = "button";
+      exactButton.className = "choice blue";
+      exactButton.textContent = "Passend";
+      exactButton.onclick = function () {
+        paid = total;
+        renderPayment();
+      };
+
+      var resetButton = document.createElement("button");
+      resetButton.type = "button";
+      resetButton.className = "choice danger";
+      resetButton.textContent = "Geld löschen";
+      resetButton.onclick = function () {
+        paid = 0;
+        getElement("customPaidInput").value = "";
+        renderPayment();
+      };
+
+      buttons.appendChild(exactButton);
+      buttons.appendChild(resetButton);
+    }
+
+    function setCustomPaidAmount() {
+      var amount = parseEuroInput(getElement("customPaidInput").value);
+
+      if (isNaN(amount) || amount < 0) {
+        showNotice("paymentNotice", "Bitte gib einen gültigen Betrag ein.");
+        return;
+      }
+
+      paid = Math.round(amount * 100) / 100;
+      renderPayment();
+    }
+
+    function saveSaleToStats() {
+      stats.revenue = Math.round((stats.revenue + getCartTotal()) * 100) / 100;
+
+      for (var i = 0; i < cart.length; i++) {
+        var item = cart[i];
+
+        if (!stats.products[item.id]) {
+          stats.products[item.id] = {
+            name: item.name,
+            quantity: 0,
+            revenue: 0
+          };
+        }
+
+        stats.products[item.id].name = item.name;
+        stats.products[item.id].quantity += item.quantity;
+        stats.products[item.id].revenue =
+          Math.round((stats.products[item.id].revenue + item.price * item.quantity) * 100) / 100;
+      }
+
+      saveData();
+    }
+
+    function renderStats() {
+      var list = getElement("statsList");
+      var items = [];
+      var soldTotal = 0;
+
+      for (var id in stats.products) {
+        if (stats.products.hasOwnProperty(id)) items.push(stats.products[id]);
+      }
+
+      items.sort(function (a, b) {
+        return b.quantity - a.quantity;
+      });
+
+      list.innerHTML = "";
+
+      for (var i = 0; i < items.length; i++) soldTotal += items[i].quantity;
+
+      getElement("soldTotal").textContent = soldTotal;
+      getElement("revenueTotal").textContent = formatEuro(stats.revenue);
+
+      if (items.length === 0) {
+        list.innerHTML = "<p>Noch keine Verkäufe abgeschlossen.</p>";
+        return;
+      }
+
+      for (var j = 0; j < items.length; j++) {
+        var row = document.createElement("div");
+
+        row.className = "row";
+        row.innerHTML =
+          "<strong>" + escapeHtml(items[j].name) + "</strong>" +
+          "<span>" + items[j].quantity + " verkauft</span>" +
+          "<strong>" + formatEuro(items[j].revenue) + "</strong>";
+
+        list.appendChild(row);
+      }
+    }
+
+    function finishStep() {
+      if (currentPage === "setup") {
+        if (products.length === 0) {
+          showNotice("setupNotice", "Bitte lege zuerst mindestens ein Produkt an.");
+          return;
+        }
+
+        showPage("sales");
+        return;
+      }
+
+      if (currentPage === "sales") {
+        if (cart.length === 0) return;
+
+        paid = 0;
+        getElement("customPaidInput").value = "";
+        showPage("payment");
+        return;
+      }
+
+      if (currentPage === "payment") {
+        if (paid < getCartTotal()) {
+          showNotice("paymentNotice", "Bitte wähle genug Geld aus, bevor du abschließt.");
+          return;
+        }
+
+        saveSaleToStats();
+        cart = [];
+        paid = 0;
+        getElement("customPaidInput").value = "";
+        showPage("sales");
+      }
+    }
+
+    function startApp() {
+      loadData();
+      renderProducts();
+
+      getElement("addProductButton").onclick = saveProductFromForm;
+      getElement("cancelEditButton").onclick = resetEditMode;
+      getElement("finishButton").onclick = finishStep;
+      getElement("customPaidButton").onclick = setCustomPaidAmount;
+
+      getElement("backButton").onclick = function () {
+        if (currentPage === "payment") {
+          showPage("sales");
+        } else if (currentPage === "sales") {
+          showPage("setup");
+        }
+      };
+
+      getElement("clearCartButton").onclick = function () {
+        cart = [];
+        renderSales();
+      };
+
+      getElement("statsButton").onclick = function () {
+        renderStats();
+        getElement("statsModal").className = "modal-bg show";
+      };
+
+      getElement("closeStatsButton").onclick = function () {
+        getElement("statsModal").className = "modal-bg";
+      };
+
+      getElement("statsModal").onclick = function (event) {
+        if (event.target === getElement("statsModal")) {
+          getElement("statsModal").className = "modal-bg";
+        }
+      };
+
+      getElement("resetStatsButton").onclick = function () {
+        if (!confirm("Statistik wirklich löschen?")) return;
+
+        stats = { revenue: 0, products: {} };
+        saveData();
+        renderStats();
+      };
+
+      getElement("productNameInput").onkeydown = function (event) {
+        if (event.key === "Enter" || event.keyCode === 13) {
+          getElement("productPriceInput").focus();
+        }
+      };
+
+      getElement("productPriceInput").onkeydown = function (event) {
+        if (event.key === "Enter" || event.keyCode === 13) {
+          saveProductFromForm();
+        }
+      };
+
+      getElement("customPaidInput").onkeydown = function (event) {
+        if (event.key === "Enter" || event.keyCode === 13) {
+          setCustomPaidAmount();
+        }
+      };
+    }
+
+    startApp();
+  </script>
+</body>
+</html>
